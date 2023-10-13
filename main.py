@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask import current_app as LOG
 from flask_cors import CORS
+import os
 
 from src.movieServices import MovieServices
 movieServices = MovieServices()
@@ -126,6 +127,18 @@ def series_get_genres():
     except Exception as e:
         LOG.logger.error(str(e))
         return jsonify(success=False,  info='Algo salio mal', exception=''+str(e))
+    
+@app.route("/get/video")
+def get_video():
+    LOG.logger.error(request.remote_addr)
+    datos = request.args['path']
+
+    fileStr = datos.replace("-", " ").replace("&", "/")
+    arrFile = fileStr.split('\\')
+    folderF = fileStr.replace(arrFile[len(arrFile)-1], "")
+    item_download = arrFile[len(arrFile)-1]
+    
+    return send_from_directory(folderF, item_download)
 
 @app.after_request
 def after_request(response):
@@ -137,5 +150,5 @@ def after_request(response):
 #Definimos que el host sera "localhost"
 if __name__ == "__main__":
     #app.run(host='0.0.0.0')
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
